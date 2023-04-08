@@ -1,0 +1,198 @@
+from operator import contains
+import time, datetime
+from datetime import date, datetime
+from openpyxl import Workbook, load_workbook
+import os, sys #Standard python lib 
+import pandas as pd
+
+os.chdir(sys.path[0])
+# Loading ruleset and database
+WB1 = load_workbook("494445-BULK_InspectionLots.xlsx", data_only = True)
+WB1_WS1 = WB1["Sheet1"]
+WB2 = load_workbook("MQ 100 to 300 sorted-Oct-26-2022_1532.xlsx", data_only = True)
+WB2_WS1 = WB2["Export"]
+
+
+
+#Calculating index of excel sheet   
+index_end = 2
+while WB2_WS1.cell(column = 1, row = index_end).value != None:
+    index_end +=1
+index_end -= 2
+
+index_end_il = 2
+while WB1_WS1.cell(column = 1, row = index_end_il).value != None:
+    index_end_il +=1
+index_end_il -= 2
+
+
+#creation of lists for each column  
+column_a = []
+column_b = []
+column_c = []
+column_d = []
+column_e = []
+column_f = []
+column_g = []
+column_h = []
+column_i = []
+column_j = []
+column_k = []
+column_l = []
+column_m = []
+column_n = []
+column_o = []
+column_p = []
+column_q = []
+column_r = []
+column_s = []
+column_t = []
+column_u = []
+column_v = []
+column_w = []
+column_x = []
+
+
+#Collecting Data into lists from sorted family excel
+index_start = 2
+while index_end > 0:
+    column_a.append(WB2_WS1.cell(column = 1, row = index_start).value)
+    column_b.append(WB2_WS1.cell(column = 2, row = index_start).value)
+    column_c.append(WB2_WS1.cell(column = 3, row = index_start).value)
+    column_d.append(WB2_WS1.cell(column = 4, row = index_start).value)
+    column_e.append(WB2_WS1.cell(column = 5, row = index_start).value)
+    column_f.append(WB2_WS1.cell(column = 6, row = index_start).value)
+    column_g.append(WB2_WS1.cell(column = 7, row = index_start).value)
+    column_h.append(WB2_WS1.cell(column = 8, row = index_start).value)
+    column_i.append(WB2_WS1.cell(column = 9, row = index_start).value)
+    column_j.append(WB2_WS1.cell(column = 10, row = index_start).value)
+    column_k.append(WB2_WS1.cell(column = 11, row = index_start).value)
+    column_l.append(WB2_WS1.cell(column = 12, row = index_start).value)
+    column_m.append(WB2_WS1.cell(column = 13, row = index_start).value)
+    column_n.append(WB2_WS1.cell(column = 14, row = index_start).value)
+    column_o.append(WB2_WS1.cell(column = 15, row = index_start).value)
+    column_p.append(WB2_WS1.cell(column = 16, row = index_start).value)
+    column_q.append(WB2_WS1.cell(column = 17, row = index_start).value)
+    column_r.append(WB2_WS1.cell(column = 18, row = index_start).value)
+    column_s.append(WB2_WS1.cell(column = 19, row = index_start).value)
+    column_t.append(WB2_WS1.cell(column = 20, row = index_start).value)
+    column_u.append(WB2_WS1.cell(column = 21, row = index_start).value)
+    column_v.append(WB2_WS1.cell(column = 22, row = index_start).value)
+    column_w.append(WB2_WS1.cell(column = 23, row = index_start).value)
+    column_x.append(WB2_WS1.cell(column = 24, row = index_start).value)
+    index_start += 1
+    index_end -= 1
+    
+    
+material = []
+batch = []
+insp_lot = []
+ud_date = []
+
+    
+index_start = 2
+while index_end_il > 0:
+    material.append(WB1_WS1.cell(column = 1, row = index_start).value)
+    batch.append(WB1_WS1.cell(column = 2, row = index_start).value)
+    insp_lot.append(WB1_WS1.cell(column = 3, row = index_start).value)
+    ud_date.append(str(WB1_WS1.cell(column = 13, row = index_start).value))
+    index_start += 1
+    index_end_il -= 1
+
+ud_date_strip = []
+
+for items in ud_date:
+    ud_date_strip.append(items.strip("00:00:00").strip("'").strip())
+    
+#print(ud_date_strip)
+
+ud_date_strip_dt = []
+for items in ud_date_strip:
+    if items == 'None':
+        ud_date_strip_dt.append(items)
+    else:
+        ud_date_strip_dt.append(datetime.strptime(items, '%Y-%m-%d').date())
+    
+
+match_material = []
+match_batch = []
+match_insp_lot = []
+match_ud_date = []
+
+for items in column_b:
+    index_mat = 0
+    for mat in material:
+        if str(items) in str(mat):
+            match_material.append(material[index_mat])
+            match_batch.append(batch[index_mat])
+            match_insp_lot.append(insp_lot[index_mat])
+            match_ud_date.append(ud_date_strip_dt[index_mat])
+            index_mat += 1
+        else:
+            index_mat += 1
+    
+index_ud =0
+#print(match_ud_date)
+#print(match_batch)
+#date_difference = match_ud_date[0].date() - match_ud_date[1].date()
+#print(str(date_difference.days) + " days")
+
+
+set_match_batch = set(match_batch)
+list_match_batch = (list(set_match_batch))
+#print(list_match_batch)
+
+batch_UD_list = []
+for i in range(len(list_match_batch)):
+    tempList = []
+    batch_index = 0
+    for items in match_batch:
+        if items == list_match_batch[i] and match_ud_date[batch_index] != 'None':
+            tempList.append(match_ud_date[batch_index])
+            batch_index += 1
+        else:
+            batch_index += 1
+    batch_UD_list.append(tempList)
+#print(list_match_batch[0])   
+#print(max(batch_UD_list[0]))
+
+
+max_ud_list = []
+
+final_index = 0
+for items in batch_UD_list:
+    if len(items) == 1:
+        #print("Only 1 UD for this lot")
+        #print(list_match_batch[final_index])
+        max_ud_list.append(0)
+        final_index += 1        
+    else:
+        
+        timedelta_batch = max(items) - min(items)
+        #print(str(timedelta_batch.days) + " days")
+        #print("batch: " + str(list_match_batch[final_index]))
+        max_ud_list.append(timedelta_batch.days)
+        final_index += 1
+final_index_two = 0
+for items in max_ud_list:
+    if items == max(max_ud_list):
+        print(list_match_batch[final_index_two])
+        break
+    else:
+        final_index_two += 1
+print("shelf life claim of: "+ str(max(max_ud_list)) + ' days')  
+
+
+###Add if else statement to create standard shelf life date from retest date difference. EX 1964 ---> 1825 (5y)
+
+
+
+
+#batch_UD_list_strp = [datetime.strptime(date, "%Y-%m-%d") for date in batch_UD_list]
+#max_ud_list = []
+
+#for items in batch_UD_list_strp:
+#    max_ud_list.append(max(items))
+    
+
+#print(max_ud_list)
