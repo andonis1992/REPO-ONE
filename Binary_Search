@@ -1,0 +1,23 @@
+def binarySearchHelper(lst, elt, left, right):
+    if (left > right):
+        return None
+    else:
+        mid = (left + right) // 2
+        if lst[mid] == elt:
+            return mid
+        elif lst[mid] < elt:
+            return binarySearchHelper(lst, elt, mid+1, right)
+        else:
+            return binarySearchHelper(lst, elt, left, mid-1)         
+    
+
+n = 10000000
+s = 1
+q= 456
+list = list(range(s, n))
+
+
+print(binarySearchHelper(list, q, s, n))
+
+print(list[binarySearchHelper(list, q, s, n)])
+    
